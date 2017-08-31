@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "commitmsg": "commitlint -e",
-    "build:server":"tsc -p ./src/server/"
+    "build:server": "tsc -p ./src/server/"
   },
   "private": true,
   "dependencies": {
