@@ -5,6 +5,9 @@ import * as express from "express";
 import {json, urlencoded} from "body-parser";
 import * as compression from "compression";
 import * as path from "path";
+import {fourOFour} from "./core/404/404-middleware";
+import * as httpStatus from "http-status";
+
 
 const app: express.Application = express();
 
@@ -21,10 +24,12 @@ if (app.get("env") === "production") {
   app.use(express.static(path.join(__dirname, "/../client")));
 }
 
-// catch 404 and forward to error handler
-app.use((req: express.Request, res: express.Response, next) => {
-  const err = new Error("Not Found");
-  next(err);
+
+app.use(fourOFour);
+app.use((req: express.Request, res: express.Response) => {
+  if (res.statusCode === httpStatus.NOT_FOUND) {
+    res.json({message: httpStatus[httpStatus.NOT_FOUND]});
+  }
 });
 
 

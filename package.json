@@ -4,13 +4,15 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "commitmsg": "commitlint -e",
-    "build:server": "tsc -p ./src/server/"
+    "dev": "npm-run-all -p dev:*",
+    "dev:server": "tsc -w -p ./src/server & nodemon --delay 2 build/server/index.js ",
+    "dev:client": "ng serve --proxy-config proxy.conf.json",
+    "build:server": "tsc -p ./src/server/",
+    "build:client": "ng build --prod",
+    "commitmsg": "commitlint -e"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +28,8 @@
     "@types/body-parser": "^1.16.5",
     "@types/compression": "0.0.34",
     "@types/cors": "^2.8.1",
+    "@types/http-status": "^0.2.30",
+    "axios": "^0.16.2",
     "body-parser": "^1.17.2",
     "compression": "^1.7.0",
     "cookie-parser": "^1.4.3",
@@ -53,6 +57,8 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "morgan": "^1.8.2",
+    "npm-run-all": "^4.1.1",
     "protractor": "~5.1.2",
     "ts-node": "~3.2.0",
     "tslint": "~5.3.2",
