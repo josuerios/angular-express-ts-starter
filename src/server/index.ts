@@ -1,87 +1,53 @@
-#!/usr/bin/env node
 /**
- * Module dependencies.
+ * Created by Josue on 30/8/17.
  */
-import * as http from "http";
-import {app} from "./app";
+import * as express from "express";
+import * as compression from "compression";
+import {fourOFour} from "./core/404/404-middleware";
+import * as httpStatus from "http-status";
+import * as morgan from "morgan";
 
-/**
- * Get port from environment and store in Express.
- */
-const serverPort = 4201;
-const port = normalizePort(process.env.PORT || serverPort);
-app.set("port", port);
+const env = process.env.NODE_ENV;
+const app: express.Application = express();
 
-/**
- * Create HTTP server.
- */
-const server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-server.listen(port);
-server.on("error", onError);
-server.on("listening", onListening);
-
-/**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val): boolean | number {
-
-  const normalizedPort = parseInt(val, 10);
-
-  if (isNaN(normalizedPort)) {
-    // named pipe
-    return val;
-  }
-
-  if (normalizedPort >= 0) {
-    // port number
-    return normalizedPort;
-  }
-
-  return false;
+// logs to console minimal information
+// :method :url :statusCode :time :content length
+if (env === 'development') {
+  app.use(morgan('dev'));
 }
 
-/**
- * Event listener for HTTP server 'error' event.
- */
+app.disable("x-powered-by");
 
-function onError(error) {
-  if (error.syscall !== "listen") {
-    throw error;
-  }
+app.use(compression());
+// api routes
 
-  const bind = typeof port === "string"
-    ? "Pipe " + port
-    : "Port " + port;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case "EACCES":
-      console.error(bind + " requires elevated privileges");
-      process.exit(1);
-      break;
-    case "EADDRINUSE":
-      console.error(bind + " is already in use");
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+if (env !== "development") {
+  // in production mode use app application
+  app.use('/', require('./app'));
 }
 
-/**
- * Event listener for HTTP server 'listening' event.
- */
 
-function onListening() {
-  const addr = server.address();
-  const bind = typeof addr === "string"
-    ? "pipe " + addr
-    : "port " + addr.port;
-  console.log('Listening on ' + bind);
-}
+app.use(fourOFour);
+app.use((req: express.Request, res: express.Response) => {
+  if (res.statusCode === httpStatus.NOT_FOUND) {
+    res.json({message: httpStatus[httpStatus.NOT_FOUND]});
+  }
+});
+
+
+// production error handler
+// no stacktrace leaked to user
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+
+  res.status(err.status || 500);
+  res.json({
+    error: {},
+    message: err.message,
+  });
+  console.error(err);
+});
+
+export {app};
+
+
